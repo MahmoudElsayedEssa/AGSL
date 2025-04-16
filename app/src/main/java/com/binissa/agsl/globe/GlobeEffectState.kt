@@ -3,15 +3,12 @@ package com.binissa.agsl.globe
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import kotlin.math.exp
 import kotlin.math.min
-import kotlin.math.pow
 import kotlin.math.sin
-import kotlin.random.Random
 
 
 class GlobeEffectState {
@@ -138,18 +135,22 @@ class GlobeEffectState {
                 // Primary wobble (larger, slower)
                 val wobbleFrequency1 = 12f
                 val wobbleAmplitude1 = 0.0025f * dragOffset.getDistance()
-                val wobblePhase1 = (System.currentTimeMillis() % 1000) / 1000f * 2f * Math.PI.toFloat()
+                val wobblePhase1 =
+                    (System.currentTimeMillis() % 1000) / 1000f * 2f * Math.PI.toFloat()
 
                 // Secondary wobble (smaller, faster)
                 val wobbleFrequency2 = 28f
                 val wobbleAmplitude2 = 0.001f * dragOffset.getDistance()
-                val wobblePhase2 = (System.currentTimeMillis() % 500) / 500f * 2f * Math.PI.toFloat()
+                val wobblePhase2 =
+                    (System.currentTimeMillis() % 500) / 500f * 2f * Math.PI.toFloat()
 
                 // Combine wobbles
-                val wobbleX = wobbleAmplitude1 * kotlin.math.cos(wobblePhase1 + wobbleFrequency1) +
-                        wobbleAmplitude2 * kotlin.math.cos(wobblePhase2 + wobbleFrequency2)
-                val wobbleY = wobbleAmplitude1 * sin(wobblePhase1) +
-                        wobbleAmplitude2 * sin(wobblePhase2 + wobbleFrequency2)
+                val wobbleX =
+                    wobbleAmplitude1 * kotlin.math.cos(wobblePhase1 + wobbleFrequency1) + wobbleAmplitude2 * kotlin.math.cos(
+                        wobblePhase2 + wobbleFrequency2
+                    )
+                val wobbleY =
+                    wobbleAmplitude1 * sin(wobblePhase1) + wobbleAmplitude2 * sin(wobblePhase2 + wobbleFrequency2)
 
                 // Add wobble with distance-based decay
                 val wobbleDecay = 1f - kotlin.math.min(1f, dragOffset.getDistance() * 5f)

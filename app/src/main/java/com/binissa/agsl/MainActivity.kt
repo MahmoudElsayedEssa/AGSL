@@ -30,14 +30,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-
-/*
-
-import com.binissa.agsl.R
-
- val imageBitmap = remember {
-        context.resources.getDrawable(R.drawable.donut, null)
-            .toBitmap()
-            .asImageBitmap()    }
- */
