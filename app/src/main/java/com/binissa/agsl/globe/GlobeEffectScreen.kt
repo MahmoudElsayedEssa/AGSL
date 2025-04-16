@@ -1,5 +1,16 @@
 package com.binissa.agsl.globe
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,14 +47,13 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.binissa.agsl.R
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun GlobeEffectScreen() {
-    // Shared state that persists across tab changes
     val effectState = remember { GlobeEffectState() }
-    var selectedTab by remember { mutableIntStateOf(0) } // 0 = MOTION, 1 = VISUAL
+    var selectedTab by remember { mutableIntStateOf(0) }
     var isHidden by remember { mutableStateOf(false) }
 
-    // Load the image
     val context = LocalContext.current
     val imageBitmap = remember {
         context.resources.getDrawable(R.drawable.flower2, null).toBitmap().asImageBitmap()
@@ -55,7 +65,7 @@ fun GlobeEffectScreen() {
             .background(Color.Black)
             .padding(16.dp)
     ) {
-
+        // Image with GlobeEffect
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -70,16 +80,14 @@ fun GlobeEffectScreen() {
             )
         }
 
-        // Bottom controls
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            // Hide/Reset buttons
+        // Bottom Controls
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // Hide / Reset Row
             Row(
                 modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Hide",
+                    text = if (isHidden) "Show" else "Hide",
                     color = Color.White.copy(alpha = 0.7f),
                     modifier = Modifier.clickable { isHidden = !isHidden })
                 Text(
@@ -90,183 +98,204 @@ fun GlobeEffectScreen() {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Tab selector
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                color = Color(0xFF333333)
+            // Animated visibility of controls
+            AnimatedVisibility(
+                visible = !isHidden,
+                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
             ) {
-                Row(
-                    modifier = Modifier.padding(4.dp)
-                ) {
-                    // Motion tab
+                Column {
+                    // Tab Selector
                     Surface(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { selectedTab = 0 },
-                        shape = RoundedCornerShape(20.dp),
-                        color = if (selectedTab == 0) Color.White else Color.Transparent
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        color = Color(0xFF333333)
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = null,
-                                tint = if (selectedTab == 0) Color.Black else Color.White,
+                        Row(modifier = Modifier.padding(4.dp)) {
+                            // MOTION tab
+                            Surface(
                                 modifier = Modifier
-                                    .size(20.dp)
-                                    .padding(end = 4.dp)
-                            )
-                            Text(
-                                text = "MOTION",
-                                color = if (selectedTab == 0) Color.Black else Color.White
-                            )
+                                    .weight(1f)
+                                    .clickable { selectedTab = 0 },
+                                shape = RoundedCornerShape(20.dp),
+                                color = if (selectedTab == 0) Color.White else Color.Transparent
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.PlayArrow,
+                                        contentDescription = null,
+                                        tint = if (selectedTab == 0) Color.Black else Color.White,
+                                        modifier = Modifier
+                                            .size(20.dp)
+                                            .padding(end = 4.dp)
+                                    )
+                                    Text(
+                                        text = "MOTION",
+                                        color = if (selectedTab == 0) Color.Black else Color.White
+                                    )
+                                }
+                            }
+
+                            // VISUAL tab
+                            Surface(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clickable { selectedTab = 1 },
+                                shape = RoundedCornerShape(20.dp),
+                                color = if (selectedTab == 1) Color.White else Color.Transparent
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.PlayArrow,
+                                        contentDescription = null,
+                                        tint = if (selectedTab == 1) Color.Black else Color.White,
+                                        modifier = Modifier
+                                            .size(20.dp)
+                                            .padding(end = 4.dp)
+                                    )
+                                    Text(
+                                        text = "VISUAL",
+                                        color = if (selectedTab == 1) Color.Black else Color.White
+                                    )
+                                }
+                            }
                         }
                     }
 
-                    // Visual tab
-                    Surface(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { selectedTab = 1 },
-                        shape = RoundedCornerShape(20.dp),
-                        color = if (selectedTab == 1) Color.White else Color.Transparent
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = null,
-                                tint = if (selectedTab == 1) Color.Black else Color.White,
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .padding(end = 4.dp)
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    AnimatedContent(
+                        targetState = selectedTab, transitionSpec = {
+                            ((slideInHorizontally { fullWidth -> fullWidth } + fadeIn()).togetherWith(
+                                slideOutHorizontally { fullWidth -> -fullWidth } + fadeOut())).using(
+                                SizeTransform(clip = false)
                             )
-                            Text(
-                                text = "VISUAL",
-                                color = if (selectedTab == 1) Color.Black else Color.White
-                            )
+                        }, label = "TabContentTransition"
+                    ) { targetTab ->
+                        if (targetTab == 0) {
+                            // MOTION Controls
+                            Column {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("Animate", color = Color.White)
+                                    Switch(
+                                        checked = effectState.animate,
+                                        onCheckedChange = { effectState.animate = it },
+                                        colors = SwitchDefaults.colors(
+                                            checkedThumbColor = Color.White,
+                                            checkedTrackColor = Color.Green,
+                                            uncheckedThumbColor = Color.Gray,
+                                            uncheckedTrackColor = Color.DarkGray
+                                        )
+                                    )
+                                }
+
+                                SliderControl(
+                                    label = "Speed",
+                                    value = effectState.speed,
+                                    onValueChange = { effectState.speed = it },
+                                    valueRange = 0.01f..2f,
+                                    valueText = effectState.speed.format(2)
+                                )
+
+                                SliderControl(
+                                    label = "Strength",
+                                    value = effectState.strength,
+                                    onValueChange = { effectState.strength = it },
+                                    valueRange = 0.01f..1f,
+                                    valueText = effectState.strength.format(2)
+                                )
+
+                                SliderControl(
+                                    label = "Frequency",
+                                    value = effectState.frequency,
+                                    onValueChange = { effectState.frequency = it },
+                                    valueRange = 0.01f..1f,
+                                    valueText = effectState.frequency.format(2)
+                                )
+
+                                SliderControl(
+                                    label = "Noise",
+                                    value = effectState.noise,
+                                    onValueChange = { effectState.noise = it },
+                                    valueRange = 0f..1f,
+                                    valueText = effectState.noise.format(2)
+                                )
+                            }
+                        } else {
+                            // VISUAL Controls
+                            Column {
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("Refraction", color = Color.White)
+                                    Switch(
+                                        checked = effectState.refraction,
+                                        onCheckedChange = { effectState.refraction = it },
+                                        colors = SwitchDefaults.colors(
+                                            checkedThumbColor = Color.White,
+                                            checkedTrackColor = Color.Green,
+                                            uncheckedThumbColor = Color.Gray,
+                                            uncheckedTrackColor = Color.DarkGray
+                                        )
+                                    )
+                                }
+
+                                SliderControl(
+                                    label = "Edge",
+                                    value = effectState.edge,
+                                    onValueChange = { effectState.edge = it },
+                                    valueRange = 0.01f..1f,
+                                    valueText = effectState.edge.format(2)
+                                )
+
+                                SliderControl(
+                                    label = "Light",
+                                    value = effectState.light,
+                                    onValueChange = { effectState.light = it },
+                                    valueRange = 0.01f..1f,
+                                    valueText = effectState.light.format(2)
+                                )
+
+                                SliderControl(
+                                    label = "Glow",
+                                    value = effectState.glow,
+                                    onValueChange = { effectState.glow = it },
+                                    valueRange = 0.01f..1f,
+                                    valueText = effectState.glow.format(2)
+                                )
+
+                                SliderControl(
+                                    label = "Lens",
+                                    value = effectState.lens,
+                                    onValueChange = { effectState.lens = it },
+                                    valueRange = 0f..1f,
+                                    valueText = effectState.lens.format(2)
+                                )
+                            }
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Controls based on selected tab
-            if (selectedTab == 0) {
-                // MOTION controls
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Animate", color = Color.White)
-                    Switch(
-                        checked = effectState.animate,
-                        onCheckedChange = { effectState.animate = it },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = Color.Green,
-                            uncheckedThumbColor = Color.Gray,
-                            uncheckedTrackColor = Color.DarkGray
-                        )
-                    )
-                }
-
-                SliderControl(
-                    label = "Speed",
-                    value = effectState.speed,
-                    onValueChange = { effectState.speed = it },
-                    valueRange = 0.01f..2f,  // Increased range for better visibility
-                    valueText = effectState.speed.format(2)
-                )
-
-                SliderControl(
-                    label = "Strength",
-                    value = effectState.strength,
-                    onValueChange = { effectState.strength = it },
-                    valueRange = 0.01f..1f,
-                    valueText = effectState.strength.format(2)
-                )
-
-                SliderControl(
-                    label = "Frequency",
-                    value = effectState.frequency,
-                    onValueChange = { effectState.frequency = it },
-                    valueRange = 0.01f..1f,
-                    valueText = effectState.frequency.format(2)
-                )
-
-                SliderControl(
-                    label = "Noise",
-                    value = effectState.noise,
-                    onValueChange = { effectState.noise = it },
-                    valueRange = 0f..1f,
-                    valueText = effectState.noise.format(2)
-                )
-            } else {
-                // VISUAL controls
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Refraction", color = Color.White)
-                    Switch(
-                        checked = effectState.refraction,
-                        onCheckedChange = { effectState.refraction = it },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = Color.Green,
-                            uncheckedThumbColor = Color.Gray,
-                            uncheckedTrackColor = Color.DarkGray
-                        )
-                    )
-                }
-
-                SliderControl(
-                    label = "Edge",
-                    value = effectState.edge,
-                    onValueChange = { effectState.edge = it },
-                    valueRange = 0.01f..1f,
-                    valueText = effectState.edge.format(2)
-                )
-
-                SliderControl(
-                    label = "Light",
-                    value = effectState.light,
-                    onValueChange = { effectState.light = it },
-                    valueRange = 0.01f..1f,
-                    valueText = effectState.light.format(2)
-                )
-
-                SliderControl(
-                    label = "Glow",
-                    value = effectState.glow,
-                    onValueChange = { effectState.glow = it },
-                    valueRange = 0.01f..1f,
-                    valueText = effectState.glow.format(2)
-                )
-
-                SliderControl(
-                    label = "Lens",
-                    value = effectState.lens,
-                    onValueChange = { effectState.lens = it },
-                    valueRange = 0f..1f,
-                    valueText = effectState.lens.format(2)
-                )
-            }
         }
     }
 }
